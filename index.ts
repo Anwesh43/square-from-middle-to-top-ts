@@ -208,3 +208,25 @@ class SquareFromMiddleToTop {
         this.curr.startUpdating(cb)
     }
 }
+
+class Renderer {
+
+    animator : Animator = new Animator()
+    sfmt : SquareFromMiddleToTop = new SquareFromMiddleToTop()
+
+    render(context : CanvasRenderingContext2D) {
+        this.sfmt.draw(context)
+    }
+
+    handleTap(cb : Function) {
+        this.sfmt.startUpdating(() => {
+            this.animator.start(() => {
+                cb()
+                this.sfmt.update(() => {
+                    this.animator.stop()
+                    cb()
+                })
+            })
+        })
+    }
+}
