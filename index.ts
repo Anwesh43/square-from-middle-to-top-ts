@@ -13,3 +13,58 @@ const colors : Array<string> = [
     "#BF360C"
 ]
 const backColor : string = "#bdbdbd"
+
+class ScaleUtil {
+
+    static maxScale(scale : number, i : number, n : number) : number {
+        return Math.max(0, scale - i / n)
+    }
+
+    static divideScale(scale : number, i : number, n : number) : number {
+        return Math.min(1 / n, ScaleUtil.maxScale(scale, i, n)) * n 
+    }
+
+    static sinify(scale : number) : number {
+        return Math.sin(scale * Math.PI)
+    }
+}
+
+class DrawingUtil {
+
+    static drawLine(context : CanvasRenderingContext2D, x1 : number, y1 : number, x2 : number, y2 : number) {
+        context.beginPath()
+        context.moveTo(x1, y1)
+        context.lineTo(x2, y2)
+        context.stroke()
+    }
+
+    static drawSquareFromMiddleToTop(context : CanvasRenderingContext2D, scale : number) {
+        const size : number = Math.min(w, h) / sizeFactor 
+        const sf : number = ScaleUtil.sinify(scale)
+        const sf1 : number = ScaleUtil.divideScale(sf, 0, parts)
+        const sf2 : number = ScaleUtil.divideScale(sf, 1, parts)
+        const sf3 : number = ScaleUtil.divideScale(sf, 2, parts)
+        const squareSize : number = size * sf1 
+        context.save()
+        context.translate(w / 2, h / 2)
+        for (var j = 0; j < 2; j++) {
+            context.save()
+            context.scale(1 - 2 * j, 1)
+            const a : number = -w / 2 
+            const y : number = h / 2 - size / 2
+            const x : number = -(w / 2 - size / 2) * sf2 
+            DrawingUtil.drawLine(context, a, y, a + (w / 2 - size / 2) * (sf1 - sf2), y)
+            DrawingUtil.drawLine(context, a + size / 2, h / 2, a + size / 2, h / 2 - (h  - size) * sf3)
+            context.fillRect(-squareSize / 2 - x, -squareSize / 2 - (h - size) * sf3, squareSize, squareSize)
+            context.restore()
+        }
+        context.restore()
+    }
+
+    static drawSFMTNode(context : CanvasRenderingContext2D, i : number, scale : number) {
+        context.lineCap = 'round'
+        context.lineWidth = Math.min(w, h) / strokeFactor 
+        context.fillStyle = colors[i]
+        DrawingUtil.drawSquareFromMiddleToTop(context, scale)
+    }
+}
